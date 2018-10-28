@@ -8,14 +8,17 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.attribute.Attributable;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+
+import net.minecraft.server.v1_8_R3.EntityLiving;
+import net.minecraft.server.v1_8_R3.GenericAttributes;
+import net.minecraft.server.v1_8_R3.IAttribute;
 
 public class CustomBoss {
 	
@@ -67,8 +70,23 @@ public class CustomBoss {
 		ConfigurationSection attSection = section.getConfigurationSection("attributes");
 		Set<String> attKeys = attSection.getKeys(false);
 		attributes = new ArrayList<AttributeEntry>(attKeys.size());
-		for (String attKey : attKeys)
-			attributes.add(new AttributeEntry(Attribute.valueOf(attKey), attSection.getDouble(attKey)));
+		for (String attKey : attKeys) {
+			IAttribute iat = null;
+			if (attKey.equals("MAX_HEALTH"))
+				iat = GenericAttributes.maxHealth;
+			else if (attKey.equals("ATTACK_DAMAGE"))
+				iat = GenericAttributes.ATTACK_DAMAGE;
+			else if (attKey.equals("MOVEMENT_SPEED"))
+				iat = GenericAttributes.MOVEMENT_SPEED;
+			else if (attKey.equals("FOLLOW_RANGE"))
+				iat = GenericAttributes.FOLLOW_RANGE;
+			else if (attKey.equals("KNOCKBACK_RESISTANCE"))
+				iat = GenericAttributes.c;
+			else
+				Bukkit.getLogger().warning("Unsupported attribute: " + attKey);
+			if (iat != null)
+				attributes.add(new AttributeEntry(iat, attSection.getDouble(attKey)));
+		}
 		weapon = section.getItemStack("weapon");
 		helmet = section.getItemStack("helmet");
 		chestplate = section.getItemStack("chestplate");
@@ -87,8 +105,24 @@ public class CustomBoss {
 		section.set("spawnZ", spawnZ);
 		section.set("respawnTime", respawnTime);
 		ConfigurationSection attSection = section.createSection("attributes");
-		for (AttributeEntry attribute : attributes)
-			attSection.set(attribute.getAttribute().name(), attribute.getValue());
+		for (AttributeEntry attribute : attributes) {
+			String attributeName = null;
+			IAttribute a = attribute.getAttribute();
+			if (a == GenericAttributes.maxHealth)
+				attributeName = "MAX_HEALTH";
+			else if (a == GenericAttributes.ATTACK_DAMAGE)
+				attributeName = "ATTACK_DAMAGE";
+			else if (a == GenericAttributes.MOVEMENT_SPEED)
+				attributeName = "MOVEMENT_SPEED";
+			else if (a == GenericAttributes.FOLLOW_RANGE)
+				attributeName = "FOLLOW_RANGE";
+			else if (a == GenericAttributes.c)
+				attributeName = "KNOCKBACK_RESISTANCE";
+			else
+				Bukkit.getLogger().severe("Unknown entity attribute: " + a.getName());
+			if (attributeName != null)
+				attSection.set(attributeName, attribute.getValue());
+		}
 		section.set("weapon", weapon);
 		section.set("helmet", helmet);
 		section.set("chestplate", chestplate);
@@ -113,27 +147,24 @@ public class CustomBoss {
 		Entity entity = world.spawnEntity(new Location(world, spawnX, spawnY, spawnZ), type);
 		entity.setCustomNameVisible(true);
 		entity.setCustomName(name);
-		double maxHealth = -1;
 		currentID = entity.getUniqueId();
-		if (entity instanceof Attributable) {
-			Attributable a = (Attributable) entity;
-			for (AttributeEntry attribute : attributes)
-				a.getAttribute(attribute.getAttribute()).setBaseValue(attribute.getValue());
-			maxHealth = a.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
-		}
 		if (entity instanceof LivingEntity) {
 			LivingEntity le = (LivingEntity) entity;
-			if (maxHealth != -1)
-				le.setHealth(maxHealth);
+			EntityLiving el = ((CraftLivingEntity)le).getHandle();
+			for (AttributeEntry attribute : attributes) {
+				el.getAttributeInstance(attribute.getAttribute()).setValue(attribute.getValue());
+				if (attribute.getAttribute() == GenericAttributes.maxHealth)
+					le.setHealth(attribute.getValue());
+			}
 			EntityEquipment eq = le.getEquipment();
 			le.setRemoveWhenFarAway(false);
 			// Even if they happen to be null, the entity should be forced not to have any equipment there
-			eq.setItemInMainHand(weapon);
+			eq.setItemInHand(weapon);
 			eq.setHelmet(helmet);
 			eq.setChestplate(chestplate);
 			eq.setLeggings(leggings);
 			eq.setBoots(boots);
-			eq.setItemInMainHandDropChance(0);
+			eq.setItemInHandDropChance(0);
 			eq.setHelmetDropChance(0);
 			eq.setChestplateDropChance(0);
 			eq.setLeggingsDropChance(0);

@@ -5,15 +5,14 @@ import java.util.Collection;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
+import net.minecraft.server.v1_8_R3.GenericAttributes;
 import nl.knokko.bosses.plugin.BossesPlugin;
 import nl.knokko.bosses.plugin.boss.AttributeEntry;
 import nl.knokko.bosses.plugin.boss.CustomBoss;
@@ -57,16 +56,14 @@ public class CommandBosses implements CommandExecutor {
 			} else if(args[0].equals("example")) {
 				if (sender.isOp()) {
 					Collection<AttributeEntry> attributes = new ArrayList<AttributeEntry>(4);
-					attributes.add(new AttributeEntry(Attribute.GENERIC_ARMOR, 10));
-					attributes.add(new AttributeEntry(Attribute.GENERIC_MOVEMENT_SPEED, 0.3));
-					attributes.add(new AttributeEntry(Attribute.GENERIC_ATTACK_DAMAGE, 7));
-					attributes.add(new AttributeEntry(Attribute.GENERIC_MAX_HEALTH, 80));
+					attributes.add(new AttributeEntry(GenericAttributes.MOVEMENT_SPEED, 0.3));
+					attributes.add(new AttributeEntry(GenericAttributes.ATTACK_DAMAGE, 7));
+					attributes.add(new AttributeEntry(GenericAttributes.maxHealth, 80));
+					attributes.add(new AttributeEntry(GenericAttributes.FOLLOW_RANGE, 70));
+					attributes.add(new AttributeEntry(GenericAttributes.c, 1));
 					ItemStack weapon = new ItemStack(Material.IRON_AXE);
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 7);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-					ItemMeta meta = weapon.getItemMeta();
-					meta.setUnbreakable(true);
-					weapon.setItemMeta(meta);
 					BossesPlugin.getInstance().getBosses().add(new CustomBoss("Example boss", EntityType.ZOMBIE, 
 							"world", 0, 70, 0, 300000, attributes, weapon, new ItemStack(Material.DIAMOND_HELMET), 
 							null, new ItemStack(Material.CHAINMAIL_LEGGINGS), null));

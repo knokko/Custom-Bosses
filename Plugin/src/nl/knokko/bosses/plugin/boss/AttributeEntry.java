@@ -1,18 +1,18 @@
 package nl.knokko.bosses.plugin.boss;
 
-import org.bukkit.attribute.Attribute;
+import net.minecraft.server.v1_8_R3.IAttribute;
 
 public class AttributeEntry {
 	
-	private final Attribute attribute;
+	private final IAttribute attribute;
 	private final double value;
 	
-	public AttributeEntry(Attribute attribute, double value) {
+	public AttributeEntry(IAttribute attribute, double value) {
 		this.attribute = attribute;
 		this.value = value;
 	}
 	
-	public Attribute getAttribute() {
+	public IAttribute getAttribute() {
 		return attribute;
 	}
 	
