@@ -35,6 +35,8 @@ public class CustomBoss {
 	private final int respawnTime;
 	
 	private final Collection<AttributeEntry> attributes;
+	private final Collection<ItemStack> drops;
+	private final int droppedXP;
 	
 	private final ItemStack weapon;
 	private final ItemStack helmet;
@@ -43,7 +45,7 @@ public class CustomBoss {
 	private final ItemStack boots;
 	
 	public CustomBoss(String name, EntityType type, String world, int x, int y, int z, int respawnTime, 
-			Collection<AttributeEntry> attributes, ItemStack weapon, ItemStack helmet, ItemStack chestplate, ItemStack leggings, ItemStack boots) {
+			Collection<AttributeEntry> attributes, Collection<ItemStack> drops, int dropXP, ItemStack weapon, ItemStack helmet, ItemStack chestplate, ItemStack leggings, ItemStack boots) {
 		this.name = name;
 		this.type = type;
 		spawnWorld = world;
@@ -52,6 +54,8 @@ public class CustomBoss {
 		spawnZ = z;
 		this.respawnTime = respawnTime;
 		this.attributes = attributes;
+		this.drops = drops;
+		this.droppedXP = dropXP;
 		this.weapon = weapon;
 		this.helmet = helmet;
 		this.chestplate = chestplate;
@@ -87,6 +91,12 @@ public class CustomBoss {
 			if (iat != null)
 				attributes.add(new AttributeEntry(iat, attSection.getDouble(attKey)));
 		}
+		ConfigurationSection dropSection = section.getConfigurationSection("drops");
+		Set<String> dropKeys = dropSection.getKeys(false);
+		drops = new ArrayList<ItemStack>(dropKeys.size());
+		for (String dropKey : dropKeys)
+			drops.add(dropSection.getItemStack(dropKey));
+		droppedXP = section.getInt("droppedXP");
 		weapon = section.getItemStack("weapon");
 		helmet = section.getItemStack("helmet");
 		chestplate = section.getItemStack("chestplate");
@@ -123,6 +133,11 @@ public class CustomBoss {
 			if (attributeName != null)
 				attSection.set(attributeName, attribute.getValue());
 		}
+		ConfigurationSection dropsSection = section.createSection("drops");
+		int dropIndex = 0;
+		for (ItemStack drop : drops)
+			dropsSection.set("drop" + dropIndex++, drop);
+		section.set("droppedXP", droppedXP);
 		section.set("weapon", weapon);
 		section.set("helmet", helmet);
 		section.set("chestplate", chestplate);
@@ -179,6 +194,14 @@ public class CustomBoss {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public Collection<ItemStack> getDrops(){
+		return drops;
+	}
+	
+	public int getDroppedXP() {
+		return droppedXP;
 	}
 	
 	public void update() {

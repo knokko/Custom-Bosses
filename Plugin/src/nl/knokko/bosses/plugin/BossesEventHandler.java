@@ -13,8 +13,14 @@ public class BossesEventHandler implements Listener {
 	@EventHandler
 	public void onDeath(EntityDeathEvent event) {
 		Collection<CustomBoss> bosses = BossesPlugin.getInstance().getBosses();
-		for (CustomBoss boss : bosses)
-			if (event.getEntity().getUniqueId().equals(boss.getCurrentID()))
+		for (CustomBoss boss : bosses) {
+			if (event.getEntity().getUniqueId().equals(boss.getCurrentID())) {
 				boss.setDead();
+				event.getDrops().clear();
+				event.getDrops().addAll(boss.getDrops());
+				event.setDroppedExp(boss.getDroppedXP());
+				break;
+			}
+		}
 	}
 }

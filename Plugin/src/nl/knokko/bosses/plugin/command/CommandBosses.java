@@ -61,11 +61,17 @@ public class CommandBosses implements CommandExecutor {
 					attributes.add(new AttributeEntry(GenericAttributes.maxHealth, 80));
 					attributes.add(new AttributeEntry(GenericAttributes.FOLLOW_RANGE, 70));
 					attributes.add(new AttributeEntry(GenericAttributes.c, 1));
+					Collection<ItemStack> drops = new ArrayList<ItemStack>(2);
+					drops.add(new ItemStack(Material.ROTTEN_FLESH, 7));
+					ItemStack sword = new ItemStack(Material.IRON_SWORD);
+					sword.addUnsafeEnchantment(Enchantment.DAMAGE_UNDEAD, 10);
+					sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+					drops.add(sword);
 					ItemStack weapon = new ItemStack(Material.IRON_AXE);
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 7);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 					BossesPlugin.getInstance().getBosses().add(new CustomBoss("Example boss", EntityType.ZOMBIE, 
-							"world", 0, 70, 0, 300000, attributes, weapon, new ItemStack(Material.DIAMOND_HELMET), 
+							"world", 0, 70, 0, 300000, attributes, drops, 10, weapon, new ItemStack(Material.DIAMOND_HELMET), 
 							null, new ItemStack(Material.CHAINMAIL_LEGGINGS), null));
 					sender.sendMessage("An example boss has been added");
 					BossesPlugin.getInstance().save();
