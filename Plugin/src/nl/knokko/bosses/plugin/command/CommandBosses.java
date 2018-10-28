@@ -61,7 +61,7 @@ public class CommandBosses implements CommandExecutor {
 					attributes.add(new AttributeEntry(Attribute.GENERIC_MOVEMENT_SPEED, 0.3));
 					attributes.add(new AttributeEntry(Attribute.GENERIC_ATTACK_DAMAGE, 7));
 					attributes.add(new AttributeEntry(Attribute.GENERIC_MAX_HEALTH, 80));
-					ItemStack weapon = new ItemStack(Material.GOLDEN_AXE);
+					ItemStack weapon = new ItemStack(Material.IRON_AXE);
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 7);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 					ItemMeta meta = weapon.getItemMeta();

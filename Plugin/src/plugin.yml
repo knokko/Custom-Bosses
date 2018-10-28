@@ -1,7 +1,6 @@
 name: CustomBosses
 main: nl.knokko.bosses.plugin.BossesPlugin
 version: 1.0
-api-version: 1.13
 commands:
   custombosses:
     description: Manage the custom bosses
