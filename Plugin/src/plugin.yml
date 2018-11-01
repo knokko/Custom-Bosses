@@ -1,7 +1,8 @@
 name: CustomBosses
 main: nl.knokko.bosses.plugin.BossesPlugin
-version: 1.0
+version: 1.1
 commands:
   custombosses:
     description: Manage the custom bosses
-    useage: /custombosses reload/list/example/spawn
+    useage: /custombosses reload/save/list/example/spawn
+    aliases: [cb, bosses, cbosses]

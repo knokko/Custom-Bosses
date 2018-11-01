@@ -2,6 +2,7 @@ package nl.knokko.bosses.plugin.command;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -11,6 +12,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import nl.knokko.bosses.plugin.BossesPlugin;
@@ -20,7 +24,7 @@ import nl.knokko.bosses.plugin.boss.CustomBoss;
 public class CommandBosses implements CommandExecutor {
 	
 	private void sendUseage(CommandSender sender) {
-		sender.sendMessage(ChatColor.RED + "Use /bosses spawn/list/hardcode/reload");
+		sender.sendMessage(ChatColor.RED + "Use /bosses spawn/list/hardcode/reload/save");
 	}
 
 	@Override
@@ -55,6 +59,12 @@ public class CommandBosses implements CommandExecutor {
 				}
 			} else if(args[0].equals("example")) {
 				if (sender.isOp()) {
+					Iterator<CustomBoss> iterator = BossesPlugin.getInstance().getBosses().iterator();
+					while (iterator.hasNext()) {
+						if (iterator.next().getName().equals("Example boss")) {
+							iterator.remove();
+						}
+					}
 					Collection<AttributeEntry> attributes = new ArrayList<AttributeEntry>(4);
 					attributes.add(new AttributeEntry(GenericAttributes.MOVEMENT_SPEED, 0.3));
 					attributes.add(new AttributeEntry(GenericAttributes.ATTACK_DAMAGE, 7));
@@ -66,6 +76,10 @@ public class CommandBosses implements CommandExecutor {
 					ItemStack sword = new ItemStack(Material.IRON_SWORD);
 					sword.addUnsafeEnchantment(Enchantment.DAMAGE_UNDEAD, 10);
 					sword.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+					ItemMeta meta = sword.getItemMeta();
+					meta.setDisplayName("Silver Sword");
+					meta.setLore(Lists.newArrayList("A sword...", "Made off silver"));
+					sword.setItemMeta(meta);
 					drops.add(sword);
 					ItemStack weapon = new ItemStack(Material.IRON_AXE);
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 7);
@@ -92,6 +106,13 @@ public class CommandBosses implements CommandExecutor {
 				if (sender.hasPermission("custombosses.reload")) {
 					BossesPlugin.getInstance().reload();
 					sender.sendMessage(ChatColor.GREEN + "The bosses have been reloaded.");
+				} else {
+					sender.sendMessage(ChatColor.DARK_RED + "You are not allowed to use this command.");
+				}
+			} else if(args[0].equals("save")) {
+				if (sender.hasPermission("custombosses.save")) {
+					BossesPlugin.getInstance().save();
+					sender.sendMessage(ChatColor.GREEN + "Data has been saved");
 				} else {
 					sender.sendMessage(ChatColor.DARK_RED + "You are not allowed to use this command.");
 				}

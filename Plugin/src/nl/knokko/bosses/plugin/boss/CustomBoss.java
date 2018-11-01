@@ -19,11 +19,15 @@ import org.bukkit.inventory.ItemStack;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import net.minecraft.server.v1_8_R3.IAttribute;
+import nl.knokko.bosses.plugin.BossesPlugin;
 
 public class CustomBoss {
 	
 	private UUID currentID;
 	private long timeOfDeath;
+	
+	private boolean didShow10SecMessage;
+	private boolean didShow30SecMessage;
 	
 	private final String name;
 	private final EntityType type;
@@ -159,12 +163,18 @@ public class CustomBoss {
 			Bukkit.getLogger().warning("Can't load world " + spawnWorld + " where boss " + name + " is supposed to spawn.");
 			return;
 		}
+		int chunkX = spawnX / 16;
+		int chunkZ = spawnZ / 16;
+		if (spawnX < 0) chunkX--;
+		if (spawnZ < 0) chunkZ--;
+		world.loadChunk(chunkX, chunkZ);
 		Entity entity = world.spawnEntity(new Location(world, spawnX, spawnY, spawnZ), type);
 		entity.setCustomNameVisible(true);
 		entity.setCustomName(name);
 		currentID = entity.getUniqueId();
 		if (entity instanceof LivingEntity) {
 			LivingEntity le = (LivingEntity) entity;
+			le.setRemoveWhenFarAway(false);
 			EntityLiving el = ((CraftLivingEntity)le).getHandle();
 			for (AttributeEntry attribute : attributes) {
 				el.getAttributeInstance(attribute.getAttribute()).setValue(attribute.getValue());
@@ -172,7 +182,6 @@ public class CustomBoss {
 					le.setHealth(attribute.getValue());
 			}
 			EntityEquipment eq = le.getEquipment();
-			le.setRemoveWhenFarAway(false);
 			// Even if they happen to be null, the entity should be forced not to have any equipment there
 			eq.setItemInHand(weapon);
 			eq.setHelmet(helmet);
@@ -186,6 +195,9 @@ public class CustomBoss {
 			eq.setBootsDropChance(0);
 		}
 		timeOfDeath = 0;
+		Bukkit.broadcastMessage(BossesPlugin.getInstance().getSpawnBossMessage().replaceAll("%boss%", name));
+		didShow10SecMessage = false;
+		didShow30SecMessage = false;
 	}
 	
 	public UUID getCurrentID() {
@@ -205,8 +217,19 @@ public class CustomBoss {
 	}
 	
 	public void update() {
-		if (timeOfDeath != 0 && currentID == null && System.currentTimeMillis() - timeOfDeath >= respawnTime)
-			spawn();
+		if (timeOfDeath != 0 && currentID == null) {
+			long timeLeft = timeOfDeath + respawnTime - System.currentTimeMillis();
+			if (timeLeft <= 30000 && !didShow30SecMessage) {
+				didShow30SecMessage = true;
+				Bukkit.broadcastMessage(BossesPlugin.getInstance().getAlmostSpawnBossMessage().replaceAll("%boss%", name).replaceAll("%time%", 30 + ""));
+			}
+			if (timeLeft <= 10000 && !didShow10SecMessage) {
+				didShow10SecMessage = true;
+				Bukkit.broadcastMessage(BossesPlugin.getInstance().getAlmostSpawnBossMessage().replaceAll("%boss%", name).replaceAll("%time%", 10 + ""));
+			}
+			if (timeLeft <= 0)
+				spawn();
+		}
 	}
 	
 	public void setDead() {
